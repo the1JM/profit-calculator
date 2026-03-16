@@ -62,7 +62,14 @@ Represents a financial record such as revenue or expense.
 
 ## Screenshots
 
-(Add screenshots of the application UI here)
+### Home Screen
+![Home](screenshots/home.png)
+
+### Business Management
+![Business](screenshots/business.png)
+
+### Transactions
+![Transactions](screenshots/transactions.png)
 
 ---
 
