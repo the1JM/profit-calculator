@@ -6,6 +6,12 @@ The application demonstrates object-oriented programming, multi-form desktop UI 
 
 ---
 
+## Video Demo
+
+[![Profit Calculator Demo](https://img.youtube.com/vi/fm5DcmiN9GE/0.jpg)](https://www.youtube.com/watch?v=fm5DcmiN9GE)
+
+Click the image above to watch a full demonstration of the Profit Calculator application.
+
 ## Features
 
 • Create and manage multiple businesses  
