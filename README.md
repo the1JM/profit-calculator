@@ -68,9 +68,6 @@ Represents a financial record such as revenue or expense.
 
 ## Screenshots
 
-### Home Screen
-![Home](screenshots/home.png)
-
 ### Business Management
 ![Business](screenshots/business.png)
 
