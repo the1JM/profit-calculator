@@ -1,13 +1,15 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Data;
 
 namespace ProfitCalculatorApp
 {
     public partial class BusinessForm : Form
     {
-
+        // A reference back to HomeForm lets this screen trigger saves
+        // and business-level actions such as deleting the current business.
         private HomeForm? _homeForm;
 
+        // This is the specific business the user is currently working with.
         private Business? _business;
 
 
@@ -19,6 +21,8 @@ namespace ProfitCalculatorApp
                 return;
             }
 
+            // Sales and service businesses gather transaction data differently,
+            // so only the relevant input group should be enabled.
             if (_business.Type == "Sales")
             {
                 grpSalesFields.Enabled = true;
@@ -41,6 +45,7 @@ namespace ProfitCalculatorApp
 
             if (_business != null)
             {
+                // Putting the business name in the title bar makes multiple open windows easier to identify.
                 this.Text = $"Business - {_business.Name}";
             }
         }
@@ -48,6 +53,7 @@ namespace ProfitCalculatorApp
 
         private void RefreshTransactionGrid()
         {
+            // Rebuild the grid from scratch so it always reflects the current transaction list.
             dgvTransactions.Rows.Clear();
 
             if (_business == null)
@@ -61,6 +67,7 @@ namespace ProfitCalculatorApp
 
             foreach (Transaction t in sortedTransactions)
             {
+                // Currency formatting makes the transaction history read more like a financial summary.
                 int rowIndex = dgvTransactions.Rows.Add(
                     t.Date.ToShortDateString(),
                     t.ClientName,
@@ -69,10 +76,13 @@ namespace ProfitCalculatorApp
                     t.Profit.ToString("C2")
                 );
 
+                // Store the original transaction object on the row so edit/delete actions
+                // can find the exact record the user clicked.
                 dgvTransactions.Rows[rowIndex].Tag = t;
             }
 
 
+            // Every grid refresh also updates the running totals shown below it.
             UpdateTransactionTotals();
         }
 
@@ -88,6 +98,7 @@ namespace ProfitCalculatorApp
                 return;
             }
 
+            // These totals summarize the entire transaction history for the selected business.
             decimal totalRevenue = 0;
             decimal totalProfit = 0;
 
@@ -103,6 +114,7 @@ namespace ProfitCalculatorApp
 
         private void UpdateReportControls()
         {
+            // Only the input control for the currently selected report mode should be active.
             bool isWeek = rdoWeek.Checked;
             bool isMonth = rdoMonth.Checked;
             bool isYear = rdoYear.Checked;
@@ -122,6 +134,7 @@ namespace ProfitCalculatorApp
             }
 
 
+            // Copy the business profile into the header labels when the form opens.
             lblBusinessName.Text = "Name: " + _business.Name;
             lblBusinessType.Text = "Type: " + _business.Type;
             lblBusinessState.Text = "State: " + _business.State;
@@ -129,6 +142,7 @@ namespace ProfitCalculatorApp
 
             UpdateTransactionInputVisibility();
 
+            // Load the business history into the grid immediately.
             RefreshTransactionGrid();
 
 
@@ -138,12 +152,12 @@ namespace ProfitCalculatorApp
 
         private void label1_Click(object sender, EventArgs e)
         {
-
+            // This label does not need click behavior.
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-
+            // This generated handler is currently unused.
         }
 
         private void btnDeleteBusiness_Click(object sender, EventArgs e)
@@ -153,6 +167,7 @@ namespace ProfitCalculatorApp
                 return;
             }
 
+            // Ask for confirmation because deleting a business also updates the saved file.
             DialogResult result = MessageBox.Show(
                 "Are you sure you want to delete this business?",
                 "Confirm Delete",
@@ -168,7 +183,7 @@ namespace ProfitCalculatorApp
 
         private void BusinessForm_Click(object sender, EventArgs e)
         {
-
+            // Clicking the form background has no custom behavior.
         }
 
         private void btnEditBusiness_Click(object sender, EventArgs e)
@@ -178,14 +193,15 @@ namespace ProfitCalculatorApp
                 return;
             }
 
+            // Reuse AddBusinessForm in edit mode so business details are maintained in one place.
             AddBusinessForm editForm = new AddBusinessForm(_homeForm, _business);
 
             editForm.TopMost = true;
 
             editForm.ShowDialog(this);
 
-            // After the edit window closes, _business has been updated.
-            // Now refresh the UI to match the new values.
+            // After the dialog closes, the same business object may now contain new values,
+            // so refresh the title and header labels to match it.
             this.Text = $"Business - {_business.Name}";
             lblBusinessName.Text = $"Name: {_business.Name}";
             lblBusinessType.Text = $"Type: {_business.Type}";
@@ -201,7 +217,7 @@ namespace ProfitCalculatorApp
 
         private void grpSalesFields_Enter(object sender, EventArgs e)
         {
-
+            // No extra behavior is needed when the sales group gains focus.
         }
 
         private void btnAddTransaction_Click(object sender, EventArgs e)
@@ -211,7 +227,7 @@ namespace ProfitCalculatorApp
                 return;
             }
 
-            // Common fields
+            // These fields are shared by both sales and service transactions.
             DateTime date = dtpTransactionDate.Value.Date;
             string clientName = txtClientName.Text.Trim();
 
@@ -228,16 +244,19 @@ namespace ProfitCalculatorApp
             {
                 if (_business.Type == "Sales")
                 {
+                    // Sales businesses enter revenue directly as a sale amount.
                     decimal saleAmount = decimal.Parse(txtSaleAmount.Text);
                     revenue = saleAmount;
 
                     if (txtSalesCost.Text != "")
                     {
+                        // Cost is optional, but if entered it reduces the final profit.
                         cost = decimal.Parse(txtSalesCost.Text);
                     }
                 }
                 else // Service
                 {
+                    // Service revenue is calculated from hours worked multiplied by hourly rate.
                     decimal hoursWorked = decimal.Parse(txtHoursWorked.Text);
                     decimal hourlyRate = decimal.Parse(txtHourlyRate.Text);
 
@@ -251,11 +270,12 @@ namespace ProfitCalculatorApp
             }
             catch
             {
+                // Any parse failure means one of the numeric entry fields was not valid.
                 MessageBox.Show("Please enter valid numbers.");
                 return;
             }
 
-            // Tax
+            // Tax is only applied when the business is not marked as grey market.
             decimal tax = 0;
 
             if (_business.IsGreyMarket == false)
@@ -263,10 +283,10 @@ namespace ProfitCalculatorApp
                 tax = revenue * (_business.TaxRate / 100);
             }
 
-            // Profit
+            // Profit is what remains after subtracting cost and tax from revenue.
             decimal profit = revenue - cost - tax;
 
-            // Create transaction object
+            // Package the finished values into a transaction record for storage.
             Transaction transaction = new Transaction();
             transaction.Date = date;
             transaction.ClientName = clientName;
@@ -275,7 +295,7 @@ namespace ProfitCalculatorApp
             transaction.Profit = profit;
 
 
-            // Clear inputs
+            // Clear the entry fields so the user can immediately add another transaction.
             txtClientName.Clear();
             txtSaleAmount.Clear();
             txtSalesCost.Clear();
@@ -287,15 +307,17 @@ namespace ProfitCalculatorApp
 
             MessageBox.Show("Transaction added.");
 
+            // Redraw the grid and totals now that the business history changed.
             RefreshTransactionGrid();
 
             if (_homeForm != null)
             {
+                // Save after each successful add so the new transaction survives the next restart.
                 _homeForm.SaveTransactionsToFile();
             }
 
 
-            // Clear inputs
+            // This second clear is redundant in practice, but it guarantees the client box stays empty.
             txtClientName.Clear();
 
 
@@ -304,14 +326,14 @@ namespace ProfitCalculatorApp
 
         private void dgvTransactions_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-
+            // Cell clicks rely on the grid's normal behavior only.
         }
 
 
 
         private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
         {
-
+            // The context menu uses its default opening behavior.
         }
 
 
@@ -324,6 +346,7 @@ namespace ProfitCalculatorApp
 
                 if (hit.RowIndex >= 0)
                 {
+                    // Right-click also selects the row under the cursor so edit/delete acts on the intended item.
                     dgvTransactions.ClearSelection();
                     dgvTransactions.Rows[hit.RowIndex].Selected = true;
                     dgvTransactions.CurrentCell = dgvTransactions.Rows[hit.RowIndex].Cells[0];
@@ -353,10 +376,11 @@ namespace ProfitCalculatorApp
                 return;
             }
 
-            // Rebuild cost from existing values
+            // Cost is not stored directly, so it is reconstructed from the saved transaction math.
             decimal cost = t.Revenue - t.Tax - t.Profit;
             if (cost < 0)
             {
+                // A negative reconstructed cost would not make practical sense, so clamp it to zero.
                 cost = 0;
             }
 
@@ -381,6 +405,7 @@ namespace ProfitCalculatorApp
 
             decimal editedCost = editForm.EditedCost;
 
+            // Recalculate tax and profit from the edited values so the transaction stays consistent.
             decimal taxRateToUse = 0;
             if (_business.IsGreyMarket == false)
             {
@@ -394,6 +419,7 @@ namespace ProfitCalculatorApp
 
             if (_homeForm != null)
             {
+                // Save immediately so edits are not lost if the app closes next.
                 _homeForm.SaveTransactionsToFile();
             }
         }
@@ -431,6 +457,7 @@ namespace ProfitCalculatorApp
                 return;
             }
 
+            // Remove the chosen transaction, then refresh and persist the updated history.
             _business.Transactions.Remove(t);
 
             RefreshTransactionGrid();
@@ -444,11 +471,12 @@ namespace ProfitCalculatorApp
 
         private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
         {
-
+            // The chosen date is read when a transaction or report is submitted.
         }
 
         private void rdoWeek_CheckedChanged(object sender, EventArgs e)
         {
+            // Switching report modes changes which date input control should be enabled.
             UpdateReportControls();
         }
 
@@ -469,6 +497,7 @@ namespace ProfitCalculatorApp
                 return;
             }
 
+            // The user must choose whether the report should cover a week, month, or year.
             if (!rdoWeek.Checked && !rdoMonth.Checked && !rdoYear.Checked)
             {
                 MessageBox.Show("Please select Week, Month, or Year.");
@@ -480,7 +509,7 @@ namespace ProfitCalculatorApp
 
             if (rdoWeek.Checked)
             {
-                // Treat week as Monday to Sunday
+                // This project treats a week as Monday through Sunday.
                 DateTime chosen = dtpWeekDate.Value.Date;
                 int diff = (int)chosen.DayOfWeek - (int)DayOfWeek.Monday;
                 if (diff < 0)
@@ -493,6 +522,7 @@ namespace ProfitCalculatorApp
             }
             else if (rdoMonth.Checked)
             {
+                // A month report covers the full selected month from the first day to the last.
                 DateTime chosen = dtpMonth.Value;
                 int year = chosen.Year;
                 int month = chosen.Month;
@@ -502,6 +532,7 @@ namespace ProfitCalculatorApp
             }
             else // Year
             {
+                // A year report covers January 1 through December 31 of the chosen year.
                 int year = (int)numYear.Value;
 
                 startDate = new DateTime(year, 1, 1);
@@ -518,12 +549,14 @@ namespace ProfitCalculatorApp
 
                 if (d >= startDate && d <= endDate)
                 {
+                    // Only transactions inside the selected time window count toward the report.
                     totalRevenue += t.Revenue;
                     totalTax += t.Tax;
                     totalProfit += t.Profit;
                 }
             }
 
+            // Show the completed totals in the report section of the form.
             lblReportTotalRevenueValue.Text = totalRevenue.ToString("C2");
             lblReportTotalTaxValue.Text = totalTax.ToString("C2");
             lblReportTotalProfitValue.Text = totalProfit.ToString("C2");
@@ -531,7 +564,7 @@ namespace ProfitCalculatorApp
 
         private void Fill(object sender, DataGridViewAutoSizeColumnModeEventArgs e)
         {
-
+            // No custom column auto-size behavior is needed here.
         }
     }
 }

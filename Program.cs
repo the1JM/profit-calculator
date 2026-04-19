@@ -3,14 +3,16 @@ namespace ProfitCalculatorApp
     internal static class Program
     {
         /// <summary>
-        ///  The main entry point for the application.
+        /// Application startup begins here. WinForms uses a single STA thread
+        /// because the UI message loop and controls depend on that model.
         /// </summary>
         [STAThread]
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
+            // This applies the default WinForms configuration for a modern .NET app,
+            // including startup settings like DPI behavior.
             ApplicationConfiguration.Initialize();
+            // HomeForm acts as the landing screen and the main coordinator for the app.
             Application.Run(new HomeForm());
         }
     }
