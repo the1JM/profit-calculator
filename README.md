@@ -1,85 +1,68 @@
-# Profit Calculator (C# Windows Forms)
+# Profit Calculator
 
-A desktop application built with **C# and .NET Windows Forms** that allows users to manage businesses, record financial transactions, and calculate profit.
-
-The application demonstrates object-oriented programming, multi-form desktop UI design, and persistent data storage using text files.
+A C# Windows Forms desktop application for tracking businesses, recording financial transactions, and calculating profit across different business scenarios. Built as my first full project to practice object-oriented design, multi-form UI architecture, and file-based persistence.
 
 ---
 
 ## Features
 
-• Create and manage multiple businesses  
-• Add revenue and expense transactions  
-• Edit existing transactions  
-• Automatically calculate business profit  
-• Persist data between sessions using text file storage
-
-The application stores data in text files generated when the program runs:
-
-- businesses.txt
-- transactions.txt
-
----
-
-## Technologies Used
-
-- C#
-- .NET 8 Windows Forms
-- Object-Oriented Programming
-- File I/O (text file persistence)
-- Visual Studio
-
----
-
-## Project Structure
-
-Business.cs  
-Transaction.cs  
-HomeForm.cs  
-BusinessForm.cs  
-AddBusinessForm.cs  
-EditTransactionsForm.cs  
-Program.cs  
-
-### Core Classes
-
-**Business**  
-Represents a business entity and tracks its transactions.
-
-**Transaction**  
-Represents a financial record such as revenue or expense.
+- Create and manage multiple businesses
+- Record revenue and expense transactions
+- Edit existing transactions
+- Calculate profit per business automatically
+- Persist data between sessions via text file storage
 
 ---
 
 ## How It Works
 
-1. The application loads existing data from text files when it starts.
-2. Users can create businesses and record transactions through the UI.
-3. Transactions are associated with businesses and used to calculate profit.
-4. All changes are saved to text files so data persists between sessions.
+1. The application loads existing data from `businesses.txt` and `transactions.txt` on startup
+2. Users create businesses and record transactions through the multi-form UI
+3. Transactions are associated with businesses and used to compute profit
+4. All changes are written back to the text files so data persists between sessions
 
 ---
 
 ## Screenshots
 
-### Business Management
+**Business Management:**
+
 ![Business](screenshots/business.png)
 
-### Transactions
+**Transactions:**
+
 ![Transactions](screenshots/transactions.png)
 
 ---
 
-## Future Improvements
+## Core Classes
 
-• Replace text storage with a database (SQLite or SQL Server)  
-• Add reporting and financial summaries  
-• Improve UI layout and validation  
-• Export financial reports
+- **Business** — Represents a business entity and tracks its associated transactions
+- **Transaction** — Represents a financial record (revenue or expense) linked to a business
+
+---
+
+## Technologies
+
+- C#
+- .NET 8 Windows Forms
+- Object-Oriented Programming
+- File I/O for persistence
+- Visual Studio
+
+---
+
+## What I'd Do Differently
+
+This was my first project, and the file-based persistence reflects that. A v2 would:
+
+- Replace text file storage with SQL Server (which I've since learned and applied in [middle-school-database](https://github.com/the1JM/middle-school-database))
+- Add reporting and financial summary views
+- Improve input validation and UI layout
+- Add export to CSV or PDF
 
 ---
 
 ## Author
 
-Jorge Morales  
-NYU – Information Systems Management
+Jorge Morales — NYU Information Systems Management
